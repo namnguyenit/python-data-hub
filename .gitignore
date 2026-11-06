@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Environments
+venv/
+.venv/
+env/
+ENV/
+
+# Secrets & Configuration
+.env
+.env.*
+!.env.example
+
+# Large Data & Generated Feature Matrices (>100MB)
+*tfidf_data.csv
+*bow_data.csv
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
+tempCodeRunnerFile*

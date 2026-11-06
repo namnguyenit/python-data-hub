@@ -1,0 +1,116 @@
+import json
+
+file_path = 'd:/PROJECT/phantichdulieu/Phân_tích_python.ipynb'
+with open(file_path, 'r', encoding='utf-8') as f:
+    nb = json.load(f)
+
+new_source = [
+    'import pandas as pd\n',
+    'import os\n',
+    'import py_vncorenlp\n',
+    '\n',
+    '# ==========================================\n',
+    '# CHUẨN BỊ TÀI NGUYÊN (MODELS & DICTIONARIES)\n',
+    '# ==========================================\n',
+    '\n',
+    '# 1. Khởi tạo VnCoreNLP (Dùng cho Tokenization)\n',
+    'current_dir = "."\n',
+    'py_vncorenlp.download_model(save_dir=current_dir)\n',
+    'if \'rdrsegmenter\' not in globals():\n',
+    '    try:\n',
+    '        rdrsegmenter = py_vncorenlp.VnCoreNLP(annotators=["wseg"], save_dir=current_dir)\n',
+    '        print("Đã load thành công VnCoreNLP.")\n',
+    '    except Exception as e:\n',
+    '        print(f"Lỗi khởi tạo VnCoreNLP: {e}")\n',
+    '        rdrsegmenter = None\n',
+    'else:\n',
+    '    print("VnCoreNLP đã được load.")\n',
+    '\n',
+    '# 2. Đọc từ điển Teencode (Dùng cho Lemmatization)\n',
+    'teencode_path = f"{PROJECT_PATH}/teencode.txt"\n',
+    'teencode_dict = {}\n',
+    'if os.path.exists(teencode_path):\n',
+    '    with open(teencode_path, \'r\', encoding=\'utf-8\') as f:\n',
+    '        for line in f:\n',
+    '            parts = line.strip().split(\'\\t\')\n',
+    '            if len(parts) == 2:\n',
+    '                teencode_dict[parts[0]] = parts[1]\n',
+    '\n',
+    '# 3. Danh sách Stopwords\n',
+    'stopwords_path = f"{PROJECT_PATH}/stopwords.txt"\n',
+    'stopwords = set()\n',
+    'if os.path.exists(stopwords_path):\n',
+    '    with open(stopwords_path, \'r\', encoding=\'utf-8\') as f:\n',
+    '        stopwords = set(line.strip() for line in f if line.strip())\n',
+    '\n',
+    '# ==========================================\n',
+    '# CÁC HÀM TIỀN XỬ LÝ (PIPELINE)\n',
+    '# ==========================================\n',
+    '\n',
+    'def lemmatize_vietnamese(text):\n',
+    '    """\n',
+    '    Lemmatization cho Tiếng Việt:\n',
+    '    Đưa các từ lóng, viết tắt, không dấu về dạng nguyên thể gốc trong từ điển.\n',
+    '    """\n',
+    '    if not isinstance(text, str): return ""\n',
+    '    words = text.split()\n',
+    '    lemmas = [teencode_dict.get(w, w) for w in words]\n',
+    '    return \' \'.join(lemmas)\n',
+    '\n',
+    'def tokenize_vietnamese(text):\n',
+    '    """\n',
+    '    Tokenization bằng VnCoreNLP để gom các từ ghép (ví dụ: sản_phẩm)\n',
+    '    """\n',
+    '    if not isinstance(text, str): return ""\n',
+    '    if rdrsegmenter:\n',
+    '        try:\n',
+    '            sentences = rdrsegmenter.word_segment(text)\n',
+    '            return \' \'.join(sentences)\n',
+    '        except:\n',
+    '            pass\n',
+    '    return text\n',
+    '\n',
+    'def remove_stopwords(text):\n',
+    '    """\n',
+    '    Loại bỏ các từ dừng (stopwords) không mang nhiều ý nghĩa.\n',
+    '    """\n',
+    '    if not isinstance(text, str): return ""\n',
+    '    words = [w for w in text.split() if w not in stopwords]\n',
+    '    return \' \'.join(words)\n',
+    '\n',
+    'def apply_full_pipeline(text):\n',
+    '    # Thực hiện tuần tự đúng yêu cầu bài toán:\n',
+    '    text = lemmatize_vietnamese(text) # Bước Lemmatization (Chuẩn hóa Teencode)\n',
+    '    text = tokenize_vietnamese(text)  # Bước Tokenization (VnCoreNLP)\n',
+    '    text = remove_stopwords(text)     # Bước Xóa Stopwords\n',
+    '    return text\n',
+    '\n',
+    '# ==========================================\n',
+    '# THỰC THI TRÊN DỮ LIỆU\n',
+    '# ==========================================\n',
+    'print("Đang áp dụng toàn bộ pipeline (Lemmatization -> Tokenization -> Stopwords)...")\n',
+    '\n',
+    'step1_data_path = f"{DATA_PATH}/cleaned_step1_dataset.csv"\n',
+    'df_final = pd.read_csv(step1_data_path, encoding=\'utf-8\')\n',
+    '\n',
+    'df_final[\'text\'] = df_final[\'text\'].apply(apply_full_pipeline)\n',
+    '\n',
+    'final_output_path = f"{DATA_PATH}/final_cleaned_dataset.csv"\n',
+    'df_final[[\'text\', \'label\']].to_csv(final_output_path, index=False, encoding=\'utf-8\')\n',
+    '\n',
+    'print(f"\\nHOÀN THÀNH TOÀN BỘ CÂU A3! Đã lưu tại: {final_output_path}")\n',
+    'display(df_final.head(10))\n'
+]
+
+# Thay thế ô cuối cùng chứa logic cũ
+for cell in reversed(nb.get('cells', [])):
+    if cell.get('cell_type') == 'code':
+        source = "".join(cell.get('source', []))
+        if 'def final_clean(text):' in source or 'def lemmatize_vietnamese(text):' in source:
+            cell['source'] = new_source
+            break
+
+with open(file_path, 'w', encoding='utf-8') as f:
+    json.dump(nb, f, indent=1, ensure_ascii=False)
+
+print("Updated notebook with explicit Lemmatization function.")

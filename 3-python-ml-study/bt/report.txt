@@ -1,0 +1,9 @@
+=== BÁO CÁO LOG ===
+Tổng số dòng: 7
+ERROR: 3
+INFO: 3
+WARNING: 1
+Lỗi phổ biến nhất:
+Database connection failed (2 lần)
+File uploaded (2 lần)
+Thời gian chạy: 0.0018315315246582031 giây
